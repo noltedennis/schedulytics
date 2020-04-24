@@ -1,112 +1,150 @@
 import 'package:flutter/material.dart';
-import 'package:english_words/english_words.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(SchedulyticsApp());
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+class SchedulyticsApp extends StatelessWidget {
+  Route<dynamic> _onGenerateRoute(RouteSettings settings) {
+    var routes = {
+      '/': (context) => SchedulyticsScreenFrame(DashboardScreen()),
+      '/jobs': (context) => SchedulyticsScreenFrame(JobsScreen()),
+      '/executions': (context) => SchedulyticsScreenFrame(ExecutionsScreen()),
+    };
+
+    switch (settings.name) {
+      case '/':
+      case '/jobs':
+      case '/executions':
+        return PageRouteBuilder(
+          pageBuilder: (context, _, __) => routes[settings.name](context),
+          settings: settings,
+          transitionsBuilder: (_, anim, __, child) =>
+              FadeTransition(opacity: anim, child: child),
+        );
+      default:
+        throw UnsupportedError('Unknown route: ${settings.name}');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Schedulytics',
-      theme: ThemeData(
-        primaryColor: Colors.green,
-      ),
-      home: RandomWords(),
+      initialRoute: '/',
+      onGenerateRoute: _onGenerateRoute,
+      debugShowCheckedModeBanner: false,
     );
   }
 }
 
-class RandomWords extends StatefulWidget {
-  @override
-  RandomWordsState createState() => RandomWordsState();
-}
+class SchedulyticsScreenFrame extends StatelessWidget {
+  final Widget body;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
-class RandomWordsState extends State<RandomWords> {
-  final List<WordPair> _suggestions = <WordPair>[];
-  final Set<WordPair> _saved = Set<WordPair>();
-  final TextStyle _biggerFont = const TextStyle(fontSize: 18.0);
+  SchedulyticsScreenFrame(this.body);
 
-  Widget _buildSuggestions() {
-    return ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemBuilder: (context, i) {
-          if (i.isOdd) return Divider();
-
-          final index = i ~/ 2;
-          if (index >= _suggestions.length) {
-            _suggestions.addAll(generateWordPairs().take(10));
-          }
-          return _buildRow(_suggestions[index]);
-        });
-  }
-
-  Widget _buildRow(WordPair pair) {
-    final bool alreadySaved = _saved.contains(pair);
-
-    return ListTile(
-      title: Text(
-        pair.asPascalCase,
-        style: _biggerFont,
-      ),
-      trailing: Icon(
-        alreadySaved ? Icons.favorite : Icons.favorite_border,
-        color: alreadySaved ? Colors.red : null,
-      ),
-      onTap: () {
-        setState(() {
-          if (alreadySaved) {
-            _saved.remove(pair);
-          } else {
-            _saved.add(pair);
-          }
-        });
-      },
-    );
-  }
-
-  void _pushSaved() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (BuildContext context) {
-          final Iterable<ListTile> tiles = _saved.map(
-            (WordPair pair) {
-              return ListTile(
-                title: Text(
-                  pair.asPascalCase,
-                  style: _biggerFont
-                ),
-              );
-            },
-          );
-          final List<Widget> divided = ListTile
-            .divideTiles(
-              context: context,
-              tiles: tiles,
-            )
-            .toList();
-          
-          return Scaffold(
-            appBar: AppBar(
-              title: Text('Saved suggestions'),
-            ),
-            body: ListView(children: divided)
-          );
-        },
-      ),
-    );
-  }
-
+  // Using nested Scaffolds is not recommended, but for web
+  // it is currently the only option not to overlay the AppBar with the Drawer
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Awesome name generator'),
-        actions: <Widget>[
-          IconButton(icon: Icon(Icons.list), onPressed: _pushSaved),
+      primary: true,
+      appBar: _buildSchedulyticsAppBar(context, _scaffoldKey),
+      body: Scaffold(
+        key: _scaffoldKey,
+        drawer: SchedulyticsDrawer(),
+        body: body,
+      ),
+    );
+  }
+}
+
+AppBar _buildSchedulyticsAppBar(
+    BuildContext context, GlobalKey<ScaffoldState> scaffoldKey) {
+  return AppBar(
+    title: GestureDetector(
+      child: Text("Schedulytics"),
+      onTap: () => Navigator.pushNamed(context, '/'),
+    ),
+    leading: IconButton(
+        icon: Icon(Icons.dehaze),
+        onPressed: () {
+          if (scaffoldKey.currentState.isDrawerOpen == false) {
+            scaffoldKey.currentState.openDrawer();
+          } else {
+            scaffoldKey.currentState.openEndDrawer();
+          }
+        }),
+    automaticallyImplyLeading: false,
+    actions: <Widget>[
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          IconButton(
+            icon: Icon(Icons.settings, color: Colors.white),
+            onPressed: () => {},
+          ),
+          IconButton(
+            icon: Icon(Icons.face, color: Colors.white),
+            onPressed: () => {},
+          ),
+        ],
+      )
+    ],
+  );
+}
+
+class SchedulyticsDrawer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: <Widget>[
+          ListTile(
+            leading: Icon(Icons.home),
+            title: Text('Dashboard'),
+            onTap: () => Navigator.pushNamed(context, '/'),
+          ),
+          Divider(),
+          ListTile(
+            leading: Icon(Icons.build),
+            title: Text('Jobs'),
+            onTap: () => Navigator.pushNamed(context, '/jobs'),
+          ),
+          ListTile(
+            leading: Icon(Icons.history),
+            title: Text('Executions'),
+            onTap: () => Navigator.pushNamed(context, '/executions'),
+          ),
         ],
       ),
-      body: _buildSuggestions(),
+    );
+  }
+}
+
+class DashboardScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text('Dashboard'),
+    );
+  }
+}
+
+class JobsScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text('Jobs'),
+    );
+  }
+}
+
+class ExecutionsScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text('Executions'),
     );
   }
 }
