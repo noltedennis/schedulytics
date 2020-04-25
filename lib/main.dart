@@ -42,13 +42,48 @@ class SchedulyticsScreenFrame extends StatelessWidget {
 
   SchedulyticsScreenFrame(this.body);
 
+  AppBar _buildSchedulyticsAppBar(BuildContext context) {
+    return AppBar(
+      title: GestureDetector(
+        child: Text("Schedulytics"),
+        // TODO: Do we really need to pass context here?
+        onTap: () => Navigator.pushNamed(context, '/'),
+      ),
+      leading: IconButton(
+          icon: Icon(Icons.dehaze),
+          onPressed: () {
+            if (_scaffoldKey.currentState.isDrawerOpen == false) {
+              _scaffoldKey.currentState.openDrawer();
+            } else {
+              _scaffoldKey.currentState.openEndDrawer();
+            }
+          }),
+      automaticallyImplyLeading: false,
+      actions: <Widget>[
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            IconButton(
+              icon: Icon(Icons.settings, color: Colors.white),
+              onPressed: () => {},
+            ),
+            IconButton(
+              icon: Icon(Icons.face, color: Colors.white),
+              onPressed: () => {},
+            ),
+          ],
+        )
+      ],
+    );
+  }
+
   // Using nested Scaffolds is not recommended, but for web
   // it is currently the only option not to overlay the AppBar with the Drawer
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       primary: true,
-      appBar: _buildSchedulyticsAppBar(context, _scaffoldKey),
+      appBar: _buildSchedulyticsAppBar(context),
       body: Scaffold(
         key: _scaffoldKey,
         drawer: SchedulyticsDrawer(),
@@ -56,41 +91,6 @@ class SchedulyticsScreenFrame extends StatelessWidget {
       ),
     );
   }
-}
-
-AppBar _buildSchedulyticsAppBar(
-    BuildContext context, GlobalKey<ScaffoldState> scaffoldKey) {
-  return AppBar(
-    title: GestureDetector(
-      child: Text("Schedulytics"),
-      onTap: () => Navigator.pushNamed(context, '/'),
-    ),
-    leading: IconButton(
-        icon: Icon(Icons.dehaze),
-        onPressed: () {
-          if (scaffoldKey.currentState.isDrawerOpen == false) {
-            scaffoldKey.currentState.openDrawer();
-          } else {
-            scaffoldKey.currentState.openEndDrawer();
-          }
-        }),
-    automaticallyImplyLeading: false,
-    actions: <Widget>[
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          IconButton(
-            icon: Icon(Icons.settings, color: Colors.white),
-            onPressed: () => {},
-          ),
-          IconButton(
-            icon: Icon(Icons.face, color: Colors.white),
-            onPressed: () => {},
-          ),
-        ],
-      )
-    ],
-  );
 }
 
 class SchedulyticsDrawer extends StatelessWidget {
