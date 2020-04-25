@@ -4,7 +4,7 @@ void main() => runApp(SchedulyticsApp());
 
 class SchedulyticsApp extends StatelessWidget {
   Route<dynamic> _onGenerateRoute(RouteSettings settings) {
-    var routes = {
+    final routes = {
       '/': (context) => SchedulyticsScreenFrame(DashboardScreen()),
       '/jobs': (context) => SchedulyticsScreenFrame(JobsScreen()),
       '/executions': (context) => SchedulyticsScreenFrame(ExecutionsScreen()),
