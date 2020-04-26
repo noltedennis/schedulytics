@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:schedulytics/ui/screens/SettingsScreen.dart';
+import 'package:schedulytics/ui/screens/UserProfileScreen.dart';
 
 import 'SchedulyticsScreenFrame.dart';
 import 'screens/DashboardScreen.dart';
@@ -26,6 +28,14 @@ class SchedulyticsRoutes {
     SchedulyticsRouteTypeEnum.EXECUTIONS: _SchedulyticsRoute(
       '/executions',
       (context) => SchedulyticsScreenFrame(ExecutionsScreen()),
+    ),
+    SchedulyticsRouteTypeEnum.USER_PROFILE: _SchedulyticsRoute(
+      '/profile',
+      (context) => SchedulyticsScreenFrame(UserProfileScreen()),
+    ),
+    SchedulyticsRouteTypeEnum.SETTINGS: _SchedulyticsRoute(
+      '/settings',
+      (context) => SchedulyticsScreenFrame(SettingsScreen()),
     ),
   };
 
@@ -69,7 +79,13 @@ class SchedulyticsRoutes {
   }
 }
 
-enum SchedulyticsRouteTypeEnum { DASHBOARD, JOBS, EXECUTIONS }
+enum SchedulyticsRouteTypeEnum {
+  DASHBOARD,
+  JOBS,
+  EXECUTIONS,
+  USER_PROFILE,
+  SETTINGS
+}
 
 class _SchedulyticsRoute {
   final String path;
