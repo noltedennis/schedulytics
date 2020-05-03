@@ -1,6 +1,6 @@
 # schedulytics
 
-A new Flutter project.
+The frontend to the schedulytics project.
 
 ## Getting Started
 
