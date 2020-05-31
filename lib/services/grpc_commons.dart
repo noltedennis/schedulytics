@@ -8,6 +8,6 @@ class GrpcWebClientSingleton {
   factory GrpcWebClientSingleton() => _singleton;
 
   GrpcWebClientSingleton._internal() {
-    client = GrpcWebClientChannel.xhr(Uri.parse('http://localhost'));
+    client = GrpcWebClientChannel.xhr(Uri.parse('https://api.denolte.com'));
   }
 }

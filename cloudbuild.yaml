@@ -1,0 +1,74 @@
+substitutions:
+  _CD_REPO: schedulytics-environment
+
+steps:
+  # Build the image and push it to GCR (with Kaniko caching for quick consecutive builds)
+  - name: 'gcr.io/kaniko-project/executor:latest'
+    args:
+      - --destination=gcr.io/$PROJECT_ID/schedulytics-frontend:$COMMIT_SHA
+      - --cache=true
+      - --cache-ttl=12h
+ 
+  # Make changes to the schedulytics-environment GitHub project
+  - name: gcr.io/cloud-builders/gcloud
+    id: Acquire SSH key for GitHub from SecretManager
+    entrypoint: 'bash'
+    args: 
+      - '-c'
+      - 'gcloud secrets versions access latest --secret=schedulytics-environment-ssh > /root/.ssh/id_rsa'
+    volumes:
+      - name: 'ssh'
+        path: /root/.ssh
+  
+  - name: 'gcr.io/cloud-builders/git'
+    id: Setup git with key and domain
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        chmod 600 /root/.ssh/id_rsa
+        ssh-keyscan github.com > /root/.ssh/known_hosts
+        git config --global user.email "dennis_nolte@gmx.com"
+    volumes:
+      - name: 'ssh'
+        path: /root/.ssh
+  
+  - name: 'gcr.io/cloud-builders/git'
+    id: Clone the repository
+    args:
+      - clone
+      - git@github.com:noltedennis/schedulytics-environment
+    volumes:
+      - name: 'ssh'
+        path: /root/.ssh
+
+  - name: gcr.io/$PROJECT_ID/yq
+    id: Update chart
+    dir: $_CD_REPO
+    args:
+      - yq
+      - write
+      - '-i'
+      - schedulytics-frontend/values.yaml
+      - image.tag
+      - $COMMIT_SHA
+
+  - name: 'gcr.io/cloud-builders/git'
+    id: Commit build changes
+    dir: $_CD_REPO
+    args:
+      - commit
+      - -am
+      - 'CI: ${COMMIT_SHA} Author: $(git log --format="%an <%ae>" -n 1 HEAD)'
+    volumes:
+    - name: 'ssh'
+      path: /root/.ssh
+    
+  - name: 'gcr.io/cloud-builders/git'
+    id: Push changes to repository
+    dir: $_CD_REPO
+    args:
+      - push
+    volumes:
+      - name: 'ssh'
+        path: /root/.ssh
